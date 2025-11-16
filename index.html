@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verdant & Co.</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      color: white;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                  url('../img/background.jpg') center/cover no-repeat fixed;
+      background-attachment: fixed;
+      filter: blur(4px);
+      z-index: -1;
+    }
+    
+    main {
+      display: flex;
+      flex-direction: row;
+      gap: 30px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .btn-start {
+      background: rgb(89, 218, 89);
+      color: white;
+      padding: 15px 35px;
+      border-radius: 12px;
+      font-size: 15px;
+      border: none;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .btn-start:hover {
+      background: green;
+      transform: scale(1.05);
+    }
+    .A{
+      width: 40%;
+      text-align: center;
+    }
+    .A h1{
+
+      margin-bottom: 15px;
+    }
+    .B{
+        width: 60%;
+        max-height: 80vh;
+        overflow-y: auto;
+        padding-right: 15px;
+        font-size: 0.95rem;
+      }
+      .B h3{
+        text-align: center;
+        margin: 0 0 25px 0;
+        font-weight: bold;
+      }
+      .B p{
+        text-align: justify;
+        line-height: 1.8;
+        margin: 0 0 15px 0;
+        opacity: 0.95;
+      }
+      .B p:last-child {
+        margin-bottom: 0;
+      }
+
+      /* Scrollbar styling */
+      .B::-webkit-scrollbar {
+        width: 8px;
+      }
+      .B::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+      }
+      .B::-webkit-scrollbar-thumb {
+        background: rgba(89, 218, 89, 0.6);
+        border-radius: 10px;
+      }
+      .B::-webkit-scrollbar-thumb:hover {
+        background: rgb(89, 218, 89);
+      }
+  </style>
+</head>
+<body>
+    
+    <main>
+        <div class="A">
+            <h1>Welcome to Verdant & Co.</h1>
+            <p>Your one-stop shop for all your needs.</p>
+            <button class="btn-start" onclick="goToProducts()">Get Started</button>
+        </div>
+        <div class="B" style="text-align: left;">
+            <h3>
+                Welcome to Verdant & Co., where quality meets variety!
+            </h3>
+            <p>
+                At Verdant & Co., we believe that greenery is more than 
+                decoration—it’s a way of life. Rooted in the philosophy 
+                of balance and renewal, our nursery is a sanctuary where 
+                nature and serenity converge.
+                Founded with a passion for plants and a vision for sustainable 
+                living, Verdant & Co. offers a curated selection of high-quality 
+                flora—from air-purifying indoor plants to lush tropical varieties. 
+                Each plant is handpicked and nurtured with care, ensuring it brings 
+                not only beauty but also wellness into your space.
+            </p>
+            <p>
+                Whether you're a seasoned gardener or just beginning your 
+                green journey, our team is here to guide you. We provide 
+                expert advice, personalized recommendations, and a welcoming 
+                environment for all plant lovers. Our mission is to reconnect 
+                people with nature—one leaf, one root, one breath at a time.
+            </p>
+            <p>
+                Step into Verdant & Co. and discover a world where every plant 
+                tells a story, and every corner breathes life.
+            </p>
+        </div>
+    </main>
+
+  <script>
+    function goToProducts() {
+      window.location.href = "product-listing.html";
+    }
+  </script>
+</body>
+</html>

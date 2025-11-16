@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Verdant & Co.</title>
+<style>
+  :root{
+    --green:#27ae60; --accent:#e74c3c; --muted:#f7f7f7; --card:#fff; --text:#222; --shadow:0 6px 20px rgba(0,0,0,.08);
+  }
+  *{box-sizing:border-box}
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; margin:0; background:#fafafa; color:var(--text)}
+  header{background:var(--green); color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:48px;height:48px;border-radius:50%;background:#fff;color:var(--green);display:flex;align-items:center;justify-content:center;font-weight:700}
+  nav .cart-btn{background:transparent;border:0;color:#fff;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px}
+  main{max-width:1100px;margin:26px auto;padding:0 18px}
+  .top-controls{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .profile{display:flex;gap:8px;align-items:center}
+  .btn{background:var(--green);color:#fff;border:0;padding:8px 12px;border-radius:8px;cursor:pointer}
+  .btn.ghost{background:transparent;border:1px solid #ddd;color:var(--text)}
+  .layout{display:flex;gap:18px}
+  .left{flex:1}
+  .right{width:360px}
+  .card{background:var(--card);padding:16px;border-radius:10px;box-shadow:var(--shadow);margin-bottom:18px}
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .filters button{padding:8px 12px;border-radius:8px;border:1px solid #eee;background:#fff;cursor:pointer}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .product{padding:14px;border-radius:8px;background:#fff;box-shadow:0 8px 18px rgba(0,0,0,0.03);text-align:center;position:relative}
+  .product .sold{position:absolute;right:12px;top:12px;background:var(--accent);color:#fff;padding:6px 8px;border-radius:6px;font-size:12px}
+  .thumb{height:170px;border-radius:8px;background:linear-gradient(180deg,#f7fff7,#f0fff0);display:flex;align-items:center;justify-content:center;margin-bottom:12px;overflow:hidden}
+  .thumb img{max-width:100%;max-height:100%}
+  .name{font-weight:700;margin-bottom:6px}
+  .price{color:var(--accent);font-weight:700;margin-bottom:8px}
+  .desc{font-size:13px;color:#666;margin-bottom:10px}
+  .add-btn{padding:10px 14px;border-radius:8px;border:0;background:var(--green);color:#fff;cursor:pointer}
+  .add-btn:disabled{opacity:.5;cursor:default}
+  /* cart area */
+  .cart-item{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #eee}
+  .cart-thumb{width:84px;height:64px;border-radius:6px;background:#f7fff7;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .cart-meta{flex:1}
+  .qty-controls{display:flex;gap:6px;align-items:center}
+  .qty-controls button{padding:6px 8px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer}
+  .muted{color:#666;font-size:13px}
+  /* admin */
+  .admin-box{font-size:13px}
+  /* responsive */
+  @media (max-width:1000px){ .grid{grid-template-columns:repeat(2,1fr)} .right{width:320px} }
+  @media (max-width:700px){ .layout{flex-direction:column} .grid{grid-template-columns:1fr} .right{width:auto} header{flex-direction:column;align-items:flex-start;gap:10px} }
+  
+  /* Admin Panel Specific */
+  #adminPanel {
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  #adminList > div {
+    display: grid;
+    grid-template-columns: 60px 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid #f0f0f0;
+    background: #fff;
+  }
+
+  #adminList > div:hover {
+    background: #f9faf9;
+  }
+
+  #adminList > div:last-child {
+    border-bottom: none;
+  }
+
+  #adminList .admin-thumb {
+    width: 60px;
+    height: 60px;
+    border-radius: 6px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  #adminList .admin-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  #adminList .admin-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  #adminList .admin-name {
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  #adminList .admin-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  #adminList .admin-controls input,
+  #adminList .admin-controls button {
+    font-size: 12px;
+  }
+
+  /* Responsive */
+  @media (max-width: 700px) {
+    #adminList > div {
+      grid-template-columns: 1fr;
+    }
+
+    #adminList .admin-controls {
+      flex-direction: row;
+      gap: 6px;
+      width: 100%;
+    }
+
+    #adminList .admin-controls input {
+      flex: 1;
+      min-width: 60px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo">V&C</div>
+    <div>
+      <div style="font-weight:700">Verdant & Co.</div>
+      <div style="font-size:12px;opacity:.95">Where Green Meets Serenity</div>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:12px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <label for="profileSelect" style="font-size:13px;opacity:.95;color:#fff">Profile</label>
+      <select id="profileSelect" style="padding:6px;border-radius:6px;border:0">
+      </select>
+      <input id="newProfile" placeholder="Nama profile" style="padding:6px;border-radius:6px;border:0" />
+      <button class="btn" id="createProfileBtn">Create</button>
+    </div>
+
+    <nav>
+      <button class="cart-btn" id="goCartBtn" title="Buka keranjang">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="stroke:white;stroke-width:1.6;vertical-align:middle"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="10" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+        <span style="display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.12);font-weight:700" id="cartCount">0</span>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="top-controls">
+    <div style="display:flex;gap:12px;align-items:center">
+      <h2 style="margin:0">Products</h2>
+      <div class="muted">— Select Plants</div>
+    </div>
+
+    <div style="display:flex;gap:10px;align-items:center">
+      <button class="btn" id="viewListingBtn">View Products</button>
+      <button class="btn ghost" id="toggleAdminBtn">Admin</button>
+      <button class="btn ghost" id="resetBtn">Reset Data</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="left">
+      <div class="card" id="listingSection">
+        <div class="filters" id="filters">
+          <button data-cat="all" class="filter active">All</button>
+          <button data-cat="air" class="filter">Air Purifying</button>
+          <button data-cat="succulent" class="filter">Succulents</button>
+          <button data-cat="fern" class="filter">Ferns & Herbs</button>
+        </div>
+
+        <div class="grid" id="productGrid" aria-live="polite"></div>
+      </div>
+
+      <div class="card" id="productDetail" style="display:none"></div>
+    </div>
+
+    <aside class="right">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-weight:700">Shopping Cart</div>
+          <div class="muted">Profile: <span id="profileLabel">guest</span></div>
+        </div>
+
+        <div id="cartList" aria-live="polite">
+          <p class="muted">Your cart is empty.</p>
+        </div>
+
+        <div style="margin-top:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="muted">Total Items</div>
+            <div id="totalItems">0</div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+            <div class="muted">Total Price</div>
+            <div id="totalPrice">$0.00</div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+            <button class="btn" id="checkoutBtn">Checkout</button>
+            <button class="btn ghost" id="continueBtn">Continue Shopping</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="adminPanel" style="display:none">
+        <div style="font-weight:700;margin-bottom:12px;font-size:16px">Admin — Edit Produk & Stok</div>
+        
+        <!-- Add New Product Section -->
+        <div style="background:#f7fff7;padding:14px;border-radius:8px;margin-bottom:14px;border:1px solid #e6f4e6">
+          <div style="font-weight:700;margin-bottom:10px;font-size:14px">➕ Add New Product</div>
+          
+          <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:10px">
+            <input type="text" id="newProdName" placeholder="Product name" style="padding:10px;border-radius:6px;border:1px solid #ddd;font-size:14px;width:100%">
+            <input type="number" id="newProdPrice" placeholder="Price ($)" style="padding:10px;border-radius:6px;border:1px solid #ddd;font-size:14px;width:100%">
+          </div>
+
+          <div style="display:grid;grid-template-columns:0.8fr 1fr;gap:10px;margin-bottom:10px">
+            <select id="newProdCategory" style="padding:10px;border-radius:6px;border:1px solid #ddd;font-size:13px">
+              <option value="air">Air Purifying</option>
+              <option value="fern">Ferns & Herbs</option>
+              <option value="succulent">Succulents</option>
+            </select>
+            <input type="number" id="newProdStock" placeholder="Stock" style="padding:10px;border-radius:6px;border:1px solid #ddd;font-size:14px;width:100%">
+          </div>
+
+          <div style="margin-bottom:10px">
+            <textarea id="newProdDesc" placeholder="Description..." style="padding:10px;border-radius:6px;border:1px solid #ddd;width:100%;height:60px;font-family:system-ui;font-size:14px;resize:vertical"></textarea>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin-bottom:10px">
+            <input type="file" id="newProdImage" accept="image/*" style="padding:8px;border-radius:6px;border:1px solid #ddd;font-size:12px;overflow:hidden;text-overflow:ellipsis">
+            <button class="btn" id="addProductBtn" style="white-space:nowrap;padding:10px 14px">Add</button>
+          </div>
+
+          <div id="uploadStatus" style="font-size:12px;color:#666;min-height:18px"></div>
+        </div>
+
+        <!-- Products List -->
+        <div style="max-height:400px;overflow-y:auto;border-radius:8px;border:1px solid #eee">
+          <div id="adminList"></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+</main>
+
+<script>
+/* --- Storage keys --- */
+const PRODUCTS_KEY = 'spa_products_v1';
+const INVENTORY_KEY = 'spa_inventory_v1';
+const CARTS_KEY = 'spa_carts_v1';
+const PROFILE_KEY = 'spa_profile_v1';
+
+/* --- Default products --- */
+/* --- Default products --- */
+const DEFAULT_PRODUCTS = {
+  p1:{id:'p1',name:'Snake Plant',price:15,category:'air',desc:'Produces oxygen at night, improving air quality.', img:'../img/snake-plant.jpg'},
+  p2:{id:'p2',name:'Spider Plant',price:12,category:'air',desc:'Filters formaldehyde and xylene from the air.', img:'../img/spider-plant.jpg'},
+  p3:{id:'p3',name:'Peace Lily',price:18,category:'air',desc:'Removes mold spores and purifies the air.', img:'../img/peace-lily.jpg'},
+  p4:{id:'p4',name:'Boston Fern',price:14,category:'fern',desc:'Great moisture-loving fern for indoors.', img:'../img/boston-fern.jpg'},
+  p5:{id:'p5',name:'Rosemary',price:15,category:'fern',desc:'Herb for cooking and pleasant aroma.', img:'../img/rosemary.jpg'},
+  p6:{id:'p6',name:'Aloe Vera',price:11,category:'succulent',desc:'Succulent with medicinal properties.', img:'../img/aloe-vera.jpg'}
+};
+const DEFAULT_INVENTORY = { p1:5, p2:6, p3:3, p4:4, p5:7, p6:8 };
+
+/* --- Storage helpers --- */
+function read(key, fallback){ try{ const s = localStorage.getItem(key); return s ? JSON.parse(s) : fallback } catch(e){ return fallback } }
+function write(key, obj){ localStorage.setItem(key, JSON.stringify(obj)); }
+
+/* Initialize if not present */
+if(!read(PRODUCTS_KEY)) write(PRODUCTS_KEY, DEFAULT_PRODUCTS);
+if(!read(INVENTORY_KEY)) write(INVENTORY_KEY, DEFAULT_INVENTORY);
+if(!read(CARTS_KEY)) write(CARTS_KEY, { guest: {} });
+if(!read(PROFILE_KEY)) write(PROFILE_KEY, 'guest');
+
+/* --- UI refs --- */
+const productGrid = document.getElementById('productGrid');
+const filters = document.getElementById('filters');
+const cartList = document.getElementById('cartList');
+const cartCountEl = document.getElementById('cartCount');
+const totalItemsEl = document.getElementById('totalItems');
+const totalPriceEl = document.getElementById('totalPrice');
+const profileSelect = document.getElementById('profileSelect');
+const newProfileInput = document.getElementById('newProfile');
+const createProfileBtn = document.getElementById('createProfileBtn');
+const profileLabel = document.getElementById('profileLabel');
+const adminPanel = document.getElementById('adminPanel');
+const adminList = document.getElementById('adminList');
+const toggleAdminBtn = document.getElementById('toggleAdminBtn');
+const viewListingBtn = document.getElementById('viewListingBtn');
+const listingSection = document.getElementById('listingSection');
+const productDetail = document.getElementById('productDetail');
+const continueBtn = document.getElementById('continueBtn');
+const checkoutBtn = document.getElementById('checkoutBtn');
+const resetBtn = document.getElementById('resetBtn');
+
+/* --- Data accessors --- */
+function products(){ return read(PRODUCTS_KEY, {}); }
+function inventory(){ return read(INVENTORY_KEY, {}); }
+function carts(){ return read(CARTS_KEY, {}); }
+function activeProfile(){ return read(PROFILE_KEY, 'guest'); }
+
+function getActiveCart(){ const all = carts(); const p = activeProfile(); return all[p] || {}; }
+function saveActiveCart(cart){ const all = carts(); const p = activeProfile(); all[p] = cart; write(CARTS_KEY, all); updateCartUI(); }
+
+/* --- Utility: SVG placeholder or dataURL image --- */
+function placeholderDataUri(text,w=320,h=220){
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}' viewBox='0 0 ${w} ${h}'>
+    <rect width='100%' height='100%' rx='8' fill='#f7fff7'/>
+    <g transform='translate(18,20)'>
+      <circle cx='40' cy='40' r='36' fill='#e6f4e6' stroke='#cfe8cf' stroke-width='2'/>
+      <text x='92' y='48' font-family='Arial' font-size='16' fill='#4b4b4b'>${escapeXml(text)}</text>
+    </g>
+  </svg>`;
+  return 'data:image/svg+xml;charset=utf8,' + encodeURIComponent(svg);
+}
+function escapeXml(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* --- Render product grid --- */
+function renderProducts(filter='all'){
+  const pd = products();
+  const inv = inventory();
+  productGrid.innerHTML = '';
+  Object.values(pd).filter(p => filter==='all' || p.category===filter).forEach(p=>{
+    const stock = inv[p.id] || 0;
+    const img = p.img || placeholderDataUri(p.name);
+    const el = document.createElement('div');
+    el.className = 'product';
+    el.innerHTML = `
+      ${stock<=0?'<div class="sold">OUT OF STOCK</div>':''}
+      <div class="thumb"><img src="${img}" alt="${p.name}"></div>
+      <div class="name">${p.name}</div>
+      <div class="price">$${Number(p.price).toFixed(2)}</div>
+      <div class="desc">${p.desc}</div>
+      <div style="display:flex;gap:8px;align-items:center;justify-content:center;margin-top:8px">
+        <button class="add-btn" data-id="${p.id}">Add to Cart</button>
+        <button class="btn ghost view-btn" data-id="${p.id}">Details</button>
+      </div>
+      <div style="margin-top:8px;font-size:13px;color:#666">Stock: <strong id="stok-${p.id}">${stock}</strong></div>
+    `;
+    productGrid.appendChild(el);
+
+    const addBtn = el.querySelector('.add-btn');
+    const viewBtn = el.querySelector('.view-btn');
+
+    // disable if out of stock OR already in active cart (per original spec)
+    const cart = getActiveCart();
+    if((cart[p.id] && cart[p.id].qty>0) || stock<=0) {
+      addBtn.disabled = true;
+      addBtn.textContent = stock<=0 ? 'Out of Stock' : 'Added';
+    }
+
+    addBtn.addEventListener('click', ()=> {
+      addToCart(p.id);
+      addBtn.disabled = true;
+      addBtn.textContent = 'Added';
+    });
+    viewBtn.addEventListener('click', ()=> showProductDetail(p.id));
+  });
+}
+
+/* --- Product detail panel (simple) --- */
+function showProductDetail(id){
+  const p = products()[id];
+  if(!p) return;
+  const stock = (inventory()[id]||0);
+  productDetail.style.display = 'block';
+  productDetail.innerHTML = `
+    <div style="display:flex;gap:14px;align-items:flex-start">
+      <div style="width:260px"><div style="border-radius:8px;overflow:hidden" class="thumb"><img src="${p.img||placeholderDataUri(p.name)}" alt="${p.name}"></div></div>
+      <div style="flex:1">
+        <h3 style="margin:0">${p.name}</h3>
+        <div style="color:var(--accent);font-weight:700;margin-top:6px">$${Number(p.price).toFixed(2)}</div>
+        <div style="margin-top:10px;color:#666">${p.desc}</div>
+        <div style="margin-top:10px">Stock: <strong id="detail-stok">${stock}</strong></div>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button class="add-btn" id="detailAdd" data-id="${p.id}">Add to Cart</button>
+          <button class="btn ghost" id="closeDetail">Close</button>
+        </div>
+      </div>
+    </div>
+  `;
+  const addBtn = document.getElementById('detailAdd');
+  if(stock<=0 || (getActiveCart()[id] && getActiveCart()[id].qty>0)) { addBtn.disabled = true; addBtn.textContent = stock<=0 ? 'Out of Stock' : 'Added'; }
+  addBtn.addEventListener('click', ()=> {
+    addToCart(id); addBtn.disabled=true; addBtn.textContent='Added'; document.getElementById('detail-stok').textContent = inventory()[id]||0;
+  });
+  document.getElementById('closeDetail').addEventListener('click', ()=> {
+    productDetail.style.display = 'none';
+  });
+}
+
+/* --- Add to cart: behavior ---
+   - check stock
+   - add to active profile cart (qty=1)
+   - decrement inventory
+   - persist
+   - disable add button for that product
+*/
+function addToCart(id){
+  const inv = inventory();
+  if((inv[id]||0) <= 0) { alert('Out of stock'); return; }
+  // read and update cart
+  const cart = getActiveCart();
+  if(cart[id]) { alert('Already in cart'); return; }
+  cart[id] = { qty: 1 };
+  saveActiveCart(cart);
+  // decrement inventory
+  inv[id] = (inv[id]||0) - 1;
+  write(INVENTORY_KEY, inv);
+  // persist
+  write(CARTS_KEY, carts());
+  renderProducts(currentFilter);
+  renderAdminPanel();
+  updateCartUI();
+}
+
+/* --- Cart UI rendering --- */
+function updateCartUI(){
+  const cart = getActiveCart();
+  const pd = products();
+  cartList.innerHTML = '';
+  let totalItems = 0, totalPrice = 0;
+  const ids = Object.keys(cart);
+  if(ids.length===0){
+    cartList.innerHTML = '<p class="muted">Your cart is empty.</p>';
+  } else {
+    ids.forEach(id=>{
+      const entry = cart[id];
+      const p = pd[id];
+      if(!p) return;
+      const qty = Number(entry.qty||0);
+      totalItems += qty;
+      totalPrice += qty * Number(p.price||0);
+      const div = document.createElement('div');
+      div.className = 'cart-item';
+      div.innerHTML = `
+        <div class="cart-thumb"><img src="${p.img||placeholderDataUri(p.name,240,160)}" alt="${p.name}" style="max-width:100%;max-height:100%"></div>
+        <div class="cart-meta">
+          <div style="font-weight:700">${p.name}</div>
+          <div class="muted">$${Number(p.price).toFixed(2)} each</div>
+          <div style="margin-top:6px">Total: $<span class="itemTotal">${(p.price*qty).toFixed(2)}</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+          <div class="qty-controls">
+            <button class="dec" data-id="${id}">-</button>
+            <div style="min-width:26px;text-align:center">${qty}</div>
+            <button class="inc" data-id="${id}">+</button>
+          </div>
+          <button class="btn ghost delete" data-id="${id}">Remove</button>
+        </div>
+      `;
+      cartList.appendChild(div);
+    });
+  }
+  cartCountEl.textContent = totalItems;
+  totalItemsEl.textContent = totalItems;
+  totalPriceEl.textContent = '$' + totalPrice.toFixed(2);
+
+  // attach handlers
+  document.querySelectorAll('.inc').forEach(b => b.addEventListener('click', ()=> changeQty(b.getAttribute('data-id'), +1)));
+  document.querySelectorAll('.dec').forEach(b => b.addEventListener('click', ()=> changeQty(b.getAttribute('data-id'), -1)));
+  document.querySelectorAll('.delete').forEach(b => b.addEventListener('click', ()=> removeFromCart(b.getAttribute('data-id'))));
+}
+
+/* --- Change qty in cart: affect inventory accordingly ---
+   +1: check inventory available, then decrement inventory and increment cart
+   -1: decrement cart, increment inventory; if qty reaches 0 remove entry
+*/
+function changeQty(id, delta){
+  const inv = inventory();
+  const cart = getActiveCart();
+  if(!cart[id]) return;
+  if(delta>0){
+    if((inv[id]||0) <= 0){ alert('Not enough stock available'); return; }
+    cart[id].qty = (cart[id].qty||0) + 1;
+    inv[id] = inv[id]-1;
+  } else {
+    cart[id].qty = (cart[id].qty||0) - 1;
+    inv[id] = (inv[id]||0) + 1;
+    if(cart[id].qty <= 0) delete cart[id];
+  }
+  write(INVENTORY_KEY, inv);
+  saveActiveCart(cart);
+  renderProducts(currentFilter);
+  renderAdminPanel();
+}
+
+/* --- Remove item: return qty to inventory --- */
+function removeFromCart(id){
+  const cart = getActiveCart();
+  if(!cart[id]) return;
+  const qty = cart[id].qty || 0;
+  const inv = inventory();
+  inv[id] = (inv[id]||0) + qty;
+  delete cart[id];
+  write(INVENTORY_KEY, inv);
+  saveActiveCart(cart);
+  renderProducts(currentFilter);
+  renderAdminPanel();
+}
+
+/* --- Profiles: multi-session carts --- */
+function renderProfiles(){
+  const allCarts = carts();
+  profileSelect.innerHTML = '';
+  Object.keys(allCarts).forEach(p=>{
+    const opt = document.createElement('option'); opt.value = p; opt.textContent = p;
+    profileSelect.appendChild(opt);
+  });
+  const active = activeProfile();
+  profileSelect.value = active;
+  profileLabel.textContent = active;
+}
+createProfileBtn.addEventListener('click', ()=> {
+  const name = (newProfileInput.value || '').trim();
+  if(!name) return alert('Enter a profile name');
+  const all = carts();
+  if(all[name]) return alert('Profile already exists');
+  all[name] = {};
+  write(CARTS_KEY, all);
+  write(PROFILE_KEY, name);
+  newProfileInput.value = '';
+  renderProfiles();
+  updateCartUI();
+  renderProducts(currentFilter);
+});
+profileSelect.addEventListener('change', ()=> {
+  const p = profileSelect.value;
+  write(PROFILE_KEY, p);
+  profileLabel.textContent = p;
+  renderProducts(currentFilter);
+  updateCartUI();
+});
+
+/* --- Admin panel: change stock & upload image & delete product --- */
+function renderAdminPanel(){
+  const pd = products();
+  const inv = inventory();
+  adminList.innerHTML = '';
+  Object.values(pd).forEach(p=>{
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <div class="admin-thumb"><img src="${p.img||placeholderDataUri(p.name,120,80)}" alt="${p.name}"></div>
+      <div class="admin-info">
+        <div class="admin-name">${p.name}</div>
+        <div style="font-size:12px;color:#27ae60">$${Number(p.price).toFixed(2)}</div>
+      </div>
+      <div class="admin-controls">
+        <input type="number" class="stockInput" data-id="${p.id}" value="${inv[p.id]||0}" placeholder="Stock" style="width:70px;padding:6px;border-radius:6px;border:1px solid #ddd">
+        <div style="display:flex;gap:6px">
+          <input type="file" class="imgFile" data-id="${p.id}" accept="image/*" style="display:none">
+          <button class="btn ghost changeImgBtn" data-id="${p.id}" style="font-size:12px;padding:6px 8px">Upload</button>
+          <button class="btn ghost deleteBtn" data-id="${p.id}" style="font-size:12px;padding:6px 8px;color:#e74c3c;border-color:#e74c3c">Delete</button>
+        </div>
+      </div>
+    `;
+    adminList.appendChild(div);
+  });
+
+  // Stock input handler
+  document.querySelectorAll('.stockInput').forEach(inp=>{
+    inp.addEventListener('change', (e)=>{
+      const id = inp.getAttribute('data-id');
+      const v = Math.max(0, Math.floor(Number(inp.value)||0));
+      const inv = inventory();
+      inv[id] = v;
+      write(INVENTORY_KEY, inv);
+      renderProducts(currentFilter);
+      updateCartUI();
+    });
+  });
+
+  // Image upload handler
+  document.querySelectorAll('.changeImgBtn').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      const id = btn.getAttribute('data-id');
+      const fileInput = adminList.querySelector('.imgFile[data-id="'+id+'"]');
+      fileInput.click();
+      fileInput.onchange = (ev) => {
+        const file = ev.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt){
+          const dataUrl = evt.target.result;
+          const pd = products();
+          pd[id].img = dataUrl;
+          write(PRODUCTS_KEY, pd);
+          renderProducts(currentFilter);
+          renderAdminPanel();
+        };
+        reader.readAsDataURL(file);
+      };
+    });
+  });
+
+  // Delete product handler
+  document.querySelectorAll('.deleteBtn').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      const id = btn.getAttribute('data-id');
+      const pd = products();
+      const productName = pd[id]?.name || 'Product';
+      
+      if(confirm(`Are you sure you want to delete "${productName}"?`)){
+        // Delete from products
+        delete pd[id];
+        write(PRODUCTS_KEY, pd);
+        
+        // Delete from inventory
+        const inv = inventory();
+        delete inv[id];
+        write(INVENTORY_KEY, inv);
+        
+        // Remove from all carts
+        const allCarts = carts();
+        Object.keys(allCarts).forEach(profile=>{
+          if(allCarts[profile][id]){
+            delete allCarts[profile][id];
+          }
+        });
+        write(CARTS_KEY, allCarts);
+        
+        // Re-render
+        renderProducts(currentFilter);
+        renderAdminPanel();
+        updateCartUI();
+        
+        alert(`"${productName}" deleted successfully!`);
+      }
+    });
+  });
+}
+
+/* --- Navigation: listing / cart (SPA behavior) --- */
+let currentFilter = 'all';
+filters.addEventListener('click', (ev)=>{
+  if(ev.target.classList.contains('filter')){
+    filters.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+    ev.target.classList.add('active');
+    currentFilter = ev.target.getAttribute('data-cat');
+    renderProducts(currentFilter);
+  }
+});
+
+document.getElementById('goCartBtn').addEventListener('click', ()=> {
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+viewListingBtn.addEventListener('click', ()=> { productDetail.style.display='none'; window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}); });
+
+continueBtn.addEventListener('click', ()=> {
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+checkoutBtn.addEventListener('click', ()=> {
+  alert('Checkout — Coming Soon 🚧');
+});
+
+/* --- Reset data (for testing) --- */
+resetBtn.addEventListener('click', ()=> {
+  if(!confirm('Reset all data (products, inventory, carts)?')) return;
+  localStorage.removeItem(PRODUCTS_KEY);
+  localStorage.removeItem(INVENTORY_KEY);
+  localStorage.removeItem(CARTS_KEY);
+  localStorage.removeItem(PROFILE_KEY);
+  // reinit
+  if(!read(PRODUCTS_KEY)) write(PRODUCTS_KEY, DEFAULT_PRODUCTS);
+  if(!read(INVENTORY_KEY)) write(INVENTORY_KEY, DEFAULT_INVENTORY);
+  if(!read(CARTS_KEY)) write(CARTS_KEY, { guest: {} });
+  if(!read(PROFILE_KEY)) write(PROFILE_KEY, 'guest');
+  init();
+});
+
+/* --- Admin toggle --- */
+toggleAdminBtn.addEventListener('click', ()=>{
+  adminPanel.style.display = adminPanel.style.display==='none' ? 'block' : 'none';
+});
+
+/* --- Initialization --- */
+function init(){
+  renderProfiles();
+  renderProducts('all');
+  renderAdminPanel();
+  updateCartUI();
+}
+init();
+
+/* --- run updateCartUI at load and when storage changes (support multiple tabs) --- */
+window.addEventListener('storage', ()=> {
+  renderProfiles();
+  renderProducts(currentFilter);
+  renderAdminPanel();
+  updateCartUI();
+});
+</script>
+<script>
+/* --- Add Product Handler --- */
+const addProductBtn = document.getElementById('addProductBtn');
+const uploadStatus = document.getElementById('uploadStatus');
+
+addProductBtn.addEventListener('click', async () => {
+  const name = document.getElementById('newProdName').value.trim();
+  const price = parseFloat(document.getElementById('newProdPrice').value);
+  const category = document.getElementById('newProdCategory').value;
+  const stock = parseInt(document.getElementById('newProdStock').value) || 0;
+  const desc = document.getElementById('newProdDesc').value.trim();
+  const imageFile = document.getElementById('newProdImage').files[0];
+
+  // Validation
+  if (!name) return alert('Enter product name');
+  if (!price || price <= 0) return alert('Enter valid price');
+  if (!desc) return alert('Enter description');
+  if (!imageFile) return alert('Select an image');
+
+  uploadStatus.textContent = 'Uploading...';
+  uploadStatus.style.color = '#27ae60';
+
+  try {
+    // Convert image to base64
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const base64Image = event.target.result;
+      const fileName = `${Date.now()}-${imageFile.name}`;
+      
+      // Create new product
+      const pd = products();
+      const newId = 'p' + (Object.keys(pd).length + 1);
+      const newProduct = {
+        id: newId,
+        name: name,
+        price: price,
+        category: category,
+        desc: desc,
+        img: base64Image // Store as base64 in localStorage
+      };
+      
+      pd[newId] = newProduct;
+      write(PRODUCTS_KEY, pd);
+      
+      // Add to inventory
+      const inv = inventory();
+      inv[newId] = stock;
+      write(INVENTORY_KEY, inv);
+      
+      // Clear form
+      document.getElementById('newProdName').value = '';
+      document.getElementById('newProdPrice').value = '';
+      document.getElementById('newProdStock').value = '';
+      document.getElementById('newProdDesc').value = '';
+      document.getElementById('newProdImage').value = '';
+      
+      uploadStatus.textContent = '✓ Product added successfully!';
+      uploadStatus.style.color = '#27ae60';
+      
+      setTimeout(() => {
+        uploadStatus.textContent = '';
+      }, 3000);
+      
+      // Re-render
+      renderProducts(currentFilter);
+      renderAdminPanel();
+      updateCartUI();
+    };
+    reader.readAsDataURL(imageFile);
+  } catch (error) {
+    uploadStatus.textContent = '✗ Error: ' + error.message;
+    uploadStatus.style.color = '#e74c3c';
+  }
+});
+</script>
+</body>
+</html>
